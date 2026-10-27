@@ -144,6 +144,18 @@ MedSync is an ongoing full-stack web application project focused on practical he
 
 This project is intended for educational and demonstration purposes.
 
+
+### Extract the ZIP File
+
+1. Download the MedSync project ZIP file to your computer.
+2. Locate the downloaded ZIP file in File Explorer.
+3. Right-click the ZIP file and select **Extract All**.
+4. Choose a destination folder and click **Extract**.
+5. Open the extracted `medsync` project folder in VS Code or your preferred IDE.
+6. Follow the installation and setup instructions below to configure the database and run the application.
+
 ---
+
+
 
 **MedSync — Simplifying Medicine Management, Connecting Healthcare.**
