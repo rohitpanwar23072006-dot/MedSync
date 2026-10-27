@@ -1,0 +1,734 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logs | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        header {
+            padding: 24px 35px;
+            background: #142D4E;
+            color: white;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 35px 25px;
+        }
+
+        .back-button,
+        .refresh-button {
+            display: inline-block;
+            padding: 11px 18px;
+            background: #1D5FA7;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .back-button {
+            margin-bottom: 25px;
+        }
+
+        .back-button:hover,
+        .refresh-button:hover {
+            background: #164A83;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .status {
+            color: #64748B;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            color: #C62828;
+        }
+
+        .role-section {
+            margin: 28px 0;
+        }
+
+        .role-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #DCE5F0;
+        }
+
+        .role-heading h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .count {
+            padding: 5px 11px;
+            border-radius: 20px;
+            background: #E2EDFA;
+            color: #1D5FA7;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .user-card {
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(20, 45, 78, 0.04);
+            overflow: hidden;
+        }
+
+        .user-card summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 19px 20px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .user-card summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .user-card summary::after {
+            content: "▾";
+            color: #1D5FA7;
+            font-size: 21px;
+            flex-shrink: 0;
+        }
+
+        .user-card[open] summary::after {
+            content: "▴";
+        }
+
+        .user-card summary:hover {
+            background: #F8FAFD;
+        }
+
+        .user-name {
+            margin: 0 0 6px;
+            font-size: 17px;
+            overflow-wrap: anywhere;
+        }
+
+        .user-email {
+            margin: 0;
+            color: #64748B;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .user-role {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 9px;
+            background: #EAF2FC;
+            color: #1D5FA7;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-details {
+            padding: 20px;
+            border-top: 1px solid #E0E6EF;
+        }
+
+        .user-details h3 {
+            margin: 0 0 14px;
+            font-size: 17px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .detail-item {
+            min-width: 0;
+            padding: 12px;
+            background: #F7F9FC;
+            border-radius: 7px;
+            overflow-wrap: anywhere;
+        }
+
+        .detail-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #64748B;
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .activity-heading {
+            margin-top: 25px !important;
+        }
+
+        .activity-item {
+            padding: 13px;
+            margin-top: 10px;
+            background: #F7F9FC;
+            border-left: 3px solid #1D5FA7;
+            border-radius: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .activity-item p {
+            margin: 6px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .empty {
+            padding: 20px;
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        .empty-small {
+            color: #64748B;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        footer {
+            padding: 20px;
+            background: #142D4E;
+            color: white;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 22px 18px;
+            }
+
+            main {
+                padding: 28px 16px;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-card summary {
+                padding: 16px;
+            }
+
+            .user-details {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>MedSync | Activity Logs</h1>
+    </header>
+
+    <main>
+        <a class="back-button" href="admin-dashboard.html">
+            ← Back to Admin Dashboard
+        </a>
+
+        <h2>Users &amp; Activity Logs</h2>
+        <p>Expand any user to view their available details and activity records.</p>
+
+        <div class="toolbar">
+            <p id="status" class="status" aria-live="polite">
+                Loading users and activity logs...
+            </p>
+
+            <button type="button" id="refreshButton" class="refresh-button">
+                Refresh
+            </button>
+        </div>
+
+        <div id="roleList"></div>
+    </main>
+
+    <footer>MedSync Healthcare Management System</footer>
+
+    <script>
+        const statusMessage = document.getElementById("status");
+        const roleList = document.getElementById("roleList");
+
+        const roleGroups = [
+            { key: "DOCTOR", title: "Doctors" },
+            { key: "PATIENT", title: "Patients" },
+            { key: "PHARMACIST", title: "Pharmacists" },
+            { key: "ADMIN", title: "Administrators" }
+        ];
+
+        function normalize(value) {
+            return String(value ?? "").trim().toLowerCase();
+        }
+
+        function formatLabel(key) {
+            return key
+                .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+                .replace(/[_-]/g, " ")
+                .replace(/\b\w/g, letter => letter.toUpperCase());
+        }
+
+        function displayValue(value) {
+            if (value === null || value === undefined || value === "") {
+                return "Not available";
+            }
+
+            if (typeof value === "object") {
+                return JSON.stringify(value, null, 2);
+            }
+
+            if (typeof value === "boolean") {
+                return value ? "Yes" : "No";
+            }
+
+            return String(value);
+        }
+
+        function addTextElement(parent, tag, className, value) {
+            const element = document.createElement(tag);
+
+            if (className) {
+                element.className = className;
+            }
+
+            element.textContent = value;
+            parent.appendChild(element);
+
+            return element;
+        }
+
+        function getUserName(user) {
+            return user.name ||
+                user.fullName ||
+                user.full_name ||
+                user.username ||
+                user.email ||
+                `User ${user.id ?? ""}`.trim();
+        }
+
+        function getUserRole(user) {
+            return normalize(
+                user.role?.name ??
+                user.role ??
+                user.userRole ??
+                user.user_role
+            ).replace(/^role_/, "").toUpperCase();
+        }
+
+        function getLogUserIdentifiers(log) {
+            const nestedUser = log.user || {};
+
+            return [
+                log.userId,
+                log.user_id,
+                log.actorId,
+                log.actor_id,
+                log.userEmail,
+                log.user_email,
+                log.email,
+                log.username,
+                log.userName,
+                log.user_name,
+                log.actor,
+                log.actorName,
+                log.actor_name,
+                nestedUser.id,
+                nestedUser.email,
+                nestedUser.username,
+                nestedUser.name,
+                nestedUser.fullName
+            ]
+                .filter(value =>
+                    value !== null &&
+                    value !== undefined &&
+                    typeof value !== "object"
+                )
+                .map(normalize);
+        }
+
+        function logsForUser(user, logs) {
+            const identifiers = [
+                user.id,
+                user.email,
+                user.username,
+                user.name,
+                user.fullName,
+                user.full_name
+            ]
+                .filter(value =>
+                    value !== null &&
+                    value !== undefined &&
+                    typeof value !== "object"
+                )
+                .map(normalize)
+                .filter(Boolean);
+
+            if (identifiers.length === 0) {
+                return [];
+            }
+
+            return logs.filter(log => {
+                const logIdentifiers = getLogUserIdentifiers(log);
+
+                return logIdentifiers.some(identifier =>
+                    identifiers.includes(identifier)
+                );
+            });
+        }
+
+        function addDetailsGrid(container, object, excludedKeys = []) {
+            const grid = document.createElement("div");
+            grid.className = "detail-grid";
+
+            const entries = Object.entries(object || {}).filter(([key, value]) => {
+                const lowerKey = key.toLowerCase();
+
+                return !lowerKey.includes("password") &&
+                    !lowerKey.includes("passwordhash") &&
+                    !lowerKey.includes("password_hash") &&
+                    !excludedKeys.includes(lowerKey) &&
+                    typeof value !== "function";
+            });
+
+            if (entries.length === 0) {
+                addTextElement(
+                    container,
+                    "p",
+                    "empty-small",
+                    "No additional details are available."
+                );
+                return;
+            }
+
+            entries.forEach(([key, value]) => {
+                const item = document.createElement("div");
+                item.className = "detail-item";
+
+                addTextElement(
+                    item,
+                    "span",
+                    "detail-label",
+                    formatLabel(key)
+                );
+
+                addTextElement(
+                    item,
+                    "div",
+                    "detail-value",
+                    displayValue(value)
+                );
+
+                grid.appendChild(item);
+            });
+
+            container.appendChild(grid);
+        }
+
+        function renderActivity(container, logs) {
+            if (logs.length === 0) {
+                addTextElement(
+                    container,
+                    "p",
+                    "empty-small",
+                    "No activity records could be matched to this user."
+                );
+                return;
+            }
+
+            logs.forEach((log, index) => {
+                const item = document.createElement("article");
+                item.className = "activity-item";
+
+                addTextElement(
+                    item,
+                    "strong",
+                    "",
+                    `Activity Record ${index + 1}`
+                );
+
+                Object.entries(log || {}).forEach(([key, value]) => {
+                    if (key.toLowerCase().includes("password")) {
+                        return;
+                    }
+
+                    const paragraph = document.createElement("p");
+                    const strong = document.createElement("strong");
+
+                    strong.textContent = `${formatLabel(key)}: `;
+                    paragraph.appendChild(strong);
+                    paragraph.appendChild(
+                        document.createTextNode(displayValue(value))
+                    );
+
+                    item.appendChild(paragraph);
+                });
+
+                container.appendChild(item);
+            });
+        }
+
+        function renderUser(user, logs) {
+            const details = document.createElement("details");
+            details.className = "user-card";
+
+            const summary = document.createElement("summary");
+            const summaryContent = document.createElement("div");
+
+            addTextElement(
+                summaryContent,
+                "h3",
+                "user-name",
+                getUserName(user)
+            );
+
+            addTextElement(
+                summaryContent,
+                "p",
+                "user-email",
+                user.email || "Email not available"
+            );
+
+            addTextElement(
+                summaryContent,
+                "span",
+                "user-role",
+                formatLabel(getUserRole(user) || "User")
+            );
+
+            summary.appendChild(summaryContent);
+            details.appendChild(summary);
+
+            const body = document.createElement("div");
+            body.className = "user-details";
+
+            addTextElement(body, "h3", "", "User Details");
+            addDetailsGrid(body, user, ["role"]);
+
+            addTextElement(
+                body,
+                "h3",
+                "activity-heading",
+                "Activity History"
+            );
+
+            renderActivity(body, logsForUser(user, logs));
+
+            details.appendChild(body);
+
+            return details;
+        }
+
+        function renderRoleSections(users, logs) {
+            roleList.replaceChildren();
+
+            let renderedUsers = 0;
+
+            roleGroups.forEach(group => {
+                const matchingUsers = users.filter(user =>
+                    getUserRole(user) === group.key
+                );
+
+                const section = document.createElement("section");
+                section.className = "role-section";
+
+                const heading = document.createElement("div");
+                heading.className = "role-heading";
+
+                addTextElement(heading, "h2", "", group.title);
+
+                addTextElement(
+                    heading,
+                    "span",
+                    "count",
+                    `${matchingUsers.length} user${matchingUsers.length === 1 ? "" : "s"}`
+                );
+
+                section.appendChild(heading);
+
+                const list = document.createElement("div");
+                list.className = "user-list";
+
+                if (matchingUsers.length === 0) {
+                    addTextElement(
+                        list,
+                        "div",
+                        "empty",
+                        `No ${group.title.toLowerCase()} found.`
+                    );
+                } else {
+                    matchingUsers.forEach(user => {
+                        list.appendChild(renderUser(user, logs));
+                        renderedUsers++;
+                    });
+                }
+
+                section.appendChild(list);
+                roleList.appendChild(section);
+            });
+
+            const otherUsers = users.filter(user =>
+                !roleGroups.some(group =>
+                    getUserRole(user) === group.key
+                )
+            );
+
+            if (otherUsers.length > 0) {
+                const section = document.createElement("section");
+                section.className = "role-section";
+
+                const heading = document.createElement("div");
+                heading.className = "role-heading";
+
+                addTextElement(heading, "h2", "", "Other Roles");
+
+                section.appendChild(heading);
+
+                const list = document.createElement("div");
+                list.className = "user-list";
+
+                otherUsers.forEach(user => {
+                    list.appendChild(renderUser(user, logs));
+                    renderedUsers++;
+                });
+
+                section.appendChild(list);
+                roleList.appendChild(section);
+            }
+
+            return renderedUsers;
+        }
+
+        async function loadLogs() {
+            statusMessage.className = "status";
+            statusMessage.textContent = "Loading users and activity logs...";
+            roleList.replaceChildren();
+
+            try {
+                const [usersResponse, logsResponse] = await Promise.all([
+                    fetch("/api/admin/users", {
+                        credentials: "same-origin"
+                    }),
+                    fetch("/api/admin/logs", {
+                        credentials: "same-origin"
+                    })
+                ]);
+
+                const [usersText, logsText] = await Promise.all([
+                    usersResponse.text(),
+                    logsResponse.text()
+                ]);
+
+                let users = [];
+                let logs = [];
+
+                try {
+                    users = usersText ? JSON.parse(usersText) : [];
+                    logs = logsText ? JSON.parse(logsText) : [];
+                } catch {
+                    throw new Error("The server returned an invalid response.");
+                }
+
+                if (!usersResponse.ok) {
+                    throw new Error(
+                        users.message ||
+                        users.error ||
+                        `Unable to load users (${usersResponse.status}).`
+                    );
+                }
+
+                if (!logsResponse.ok) {
+                    throw new Error(
+                        logs.message ||
+                        logs.error ||
+                        `Unable to load activity logs (${logsResponse.status}).`
+                    );
+                }
+
+                if (!Array.isArray(users) || !Array.isArray(logs)) {
+                    throw new Error("The server returned an unexpected data format.");
+                }
+
+                const count = renderRoleSections(users, logs);
+
+                statusMessage.textContent =
+                    `${count} user(s) loaded · ${logs.length} activity record(s) retrieved.`;
+            } catch (error) {
+                statusMessage.textContent =
+                    error.message || "Unable to load users and activity logs.";
+
+                statusMessage.className = "status error";
+
+                const message = document.createElement("div");
+                message.className = "empty";
+                message.textContent =
+                    "The page could not load the required data. Make sure you are logged in as an administrator and the backend is running.";
+
+                roleList.replaceChildren(message);
+            }
+        }
+
+        document.getElementById("refreshButton")
+            .addEventListener("click", loadLogs);
+
+        loadLogs();
+    </script>
+</body>
+</html>

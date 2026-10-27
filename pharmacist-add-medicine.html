@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSync | Add Medicine</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        .sidebar {
+            width: 245px;
+            height: 100vh;
+            background: #142D4E;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 28px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            color: white;
+            font-size: 27px;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 0 12px;
+            margin-bottom: 35px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-links a,
+        .logout {
+            padding: 13px 15px;
+            color: #DCE6F2;
+            text-decoration: none;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active,
+        .logout:hover {
+            background: #285D99;
+            color: white;
+        }
+
+        .logout {
+            margin-top: auto;
+        }
+
+        main {
+            margin-left: 245px;
+            padding: 30px;
+        }
+
+        header,
+        .panel {
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .muted {
+            color: #64748B;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            padding: 13px 15px;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #1D5FA7;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: #1D5FA7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #285D99;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .secondary {
+            background: #EAF2FC;
+            color: #1D5FA7;
+        }
+
+        .message {
+            margin-top: 18px;
+            font-size: 14px;
+        }
+
+        .success {
+            color: #168044;
+        }
+
+        .error {
+            color: #B42318;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .logout {
+                margin-top: 20px;
+            }
+
+            main {
+                margin-left: 0;
+                padding: 18px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full,
+            .form-actions {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <a href="/index.html" class="logo">MedSync</a>
+
+        <nav class="nav-links">
+            <a href="pharmacist-dashboard.html">Dashboard</a>
+            <a href="pharmacist-inventory.html">Medicine Inventory</a>
+            <a href="pharmacist-orders.html">Prescription Orders</a>
+            <a href="pharmacist-add-medicine.html" class="active">Add Medicine</a>
+            <a href="pharmacist-profile.html">My Profile</a>
+        </nav>
+
+        <button class="logout" onclick="logout()">Logout</button>
+    </aside>
+
+    <main>
+
+        <header>
+            <h1>Add Medicine</h1>
+            <p class="muted">Add medicines to your pharmacy inventory.</p>
+        </header>
+
+        <section class="panel">
+
+            <h2>Medicine Details</h2>
+
+            <form id="medicineForm" class="form-grid">
+
+                <div class="form-group">
+                    <label for="name">Medicine Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter medicine name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price per Unit (₹)</label>
+                    <input
+                        type="number"
+                        id="price"
+                        min="0"
+                        step="0.01"
+                        placeholder="Enter price"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="stock">Stock Quantity</label>
+                    <input
+                        type="number"
+                        id="stock"
+                        min="0"
+                        step="1"
+                        placeholder="Enter stock quantity"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="threshold">Low Stock Threshold</label>
+                    <input
+                        type="number"
+                        id="threshold"
+                        min="0"
+                        step="1"
+                        value="5"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="expiry">Expiry Date</label>
+                    <input
+                        type="date"
+                        id="expiry"
+                        required
+                    >
+                </div>
+
+                <div class="form-group full">
+                    <label for="description">Description</label>
+                    <textarea
+                        id="description"
+                        placeholder="Enter medicine description"
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn" id="saveButton">
+                        Save Medicine
+                    </button>
+
+                    <button type="reset" class="btn secondary">
+                        Clear
+                    </button>
+                </div>
+
+            </form>
+
+            <p id="message" class="message"></p>
+
+        </section>
+
+    </main>
+
+    <script>
+        const LOGIN_URL = "/login/pharmacist-login.html";
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { message: text };
+                }
+            }
+
+            if (!response.ok) {
+                const error = new Error(
+                    data.error || data.message ||
+                    `Request failed (${response.status})`
+                );
+                error.status = response.status;
+                throw error;
+            }
+
+            return data;
+        }
+
+        function daysUntilExpiry(value) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const expiry = new Date(value + "T00:00:00");
+
+            return Math.ceil((expiry - today) / 86400000);
+        }
+
+        document.getElementById("medicineForm")
+            .addEventListener("submit", async event => {
+
+                event.preventDefault();
+
+                const name = document.getElementById("name").value.trim();
+                const description =
+                    document.getElementById("description").value.trim();
+
+                const price = Number(
+                    document.getElementById("price").value
+                );
+
+                const stockQuantity = Number(
+                    document.getElementById("stock").value
+                );
+
+                const lowStockThreshold = Number(
+                    document.getElementById("threshold").value
+                );
+
+                const expiryDate =
+                    document.getElementById("expiry").value;
+
+                const message = document.getElementById("message");
+                const button = document.getElementById("saveButton");
+
+                if (!name ||
+                    !Number.isFinite(price) || price < 0 ||
+                    !Number.isInteger(stockQuantity) || stockQuantity < 0 ||
+                    !Number.isInteger(lowStockThreshold) ||
+                    lowStockThreshold < 0) {
+
+                    message.textContent = "Enter valid medicine details.";
+                    message.className = "message error";
+                    return;
+                }
+
+                if (!expiryDate || daysUntilExpiry(expiryDate) < 0) {
+                    message.textContent =
+                        "Please enter a valid, non-expired expiry date.";
+
+                    message.className = "message error";
+                    return;
+                }
+
+                button.disabled = true;
+                message.textContent = "Saving medicine...";
+                message.className = "message";
+
+                try {
+                    await api("/api/pharmacy/medicines", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            name,
+                            description,
+                            price,
+                            stockQuantity,
+                            lowStockThreshold,
+                            expiryDate,
+                            active: true
+                        })
+                    });
+
+                    document.getElementById("medicineForm").reset();
+
+                    message.textContent =
+                        "Medicine successfully added to inventory.";
+
+                    message.className = "message success";
+
+                } catch (error) {
+                    if (error.status === 401) {
+                        location.replace(LOGIN_URL);
+                        return;
+                    }
+
+                    message.textContent = error.message;
+                    message.className = "message error";
+
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+        async function logout() {
+            try {
+                await api("/api/auth/logout", { method: "POST" });
+            } finally {
+                location.replace(LOGIN_URL);
+            }
+        }
+
+        async function initialize() {
+            try {
+                const user = await api("/api/auth/me");
+
+                if (user.role !== "PHARMACIST") {
+                    location.replace("/index.html");
+                    return;
+                }
+
+            } catch (error) {
+                if (error.status === 401) {
+                    location.replace(LOGIN_URL);
+                    return;
+                }
+
+                const message = document.getElementById("message");
+                message.textContent = error.message;
+                message.className = "message error";
+            }
+        }
+
+        initialize();
+    </script>
+
+</body>
+</html>

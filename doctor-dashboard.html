@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSync | Doctor Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #F4F7FB;
+            color: #142D4E;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            height: 100vh;
+            background: #142D4E;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 28px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            font-size: 25px;
+            font-weight: bold;
+            padding: 0 12px 30px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-links a,
+        .logout {
+            color: #DCE6F2;
+            text-decoration: none;
+            padding: 13px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active,
+        .logout:hover {
+            background: #285D99;
+            color: white;
+        }
+
+        .logout {
+            margin-top: auto;
+            color: white;
+        }
+
+        .main {
+            margin-left: 245px;
+            padding: 30px;
+        }
+
+        .topbar,
+        .panel,
+        .stat {
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .topbar h1 {
+            margin-bottom: 8px;
+            font-size: 25px;
+        }
+
+        .muted,
+        .empty {
+            color: #64748B;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .stat p {
+            font-size: 13px;
+            color: #64748B;
+            margin-bottom: 10px;
+        }
+
+        .stat h2 {
+            color: #1D5FA7;
+            font-size: 28px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin-bottom: 15px;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .action {
+            padding: 14px;
+            background: white;
+            border: 1px solid #D9E4F1;
+            border-radius: 6px;
+            color: #1D5FA7;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .action:hover {
+            background: #F0F6FD;
+        }
+
+        .view[hidden],
+        [hidden] {
+            display: none !important;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 7px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D9E4F1;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .primary {
+            background: #1D5FA7;
+            color: white;
+            border: 0;
+            border-radius: 6px;
+            padding: 12px 18px;
+            cursor: pointer;
+        }
+
+        .message {
+            font-size: 14px;
+            color: #64748B;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        /* Existing appointment styles */
+
+        .appointment-card {
+            background: #F8FAFD;
+            border: 1px solid #D9E4F1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .appointment-card h3 {
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+
+        .appointment-card p {
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 5px;
+        }
+
+        .appointment-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .appointment-actions button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .accept-button {
+            background: #198754;
+        }
+
+        .decline-button {
+            background: #DC3545;
+        }
+
+        .complete-button {
+            background: #1D5FA7;
+        }
+
+        .appointment-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #E8F1FB;
+            color: #1D5FA7;
+        }
+
+        .appointment-status.pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .appointment-status.confirmed {
+            background: #D1E7DD;
+            color: #0F5132;
+        }
+
+        .appointment-status.completed {
+            background: #DCE6F2;
+            color: #142D4E;
+        }
+
+        .appointment-status.rejected,
+        .appointment-status.cancelled {
+            background: #F8D7DA;
+            color: #842029;
+        }
+
+        .appointment-error {
+            color: #DC3545;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        /* =========================================
+           NEW APPOINTMENTS LAYOUT
+           ========================================= */
+
+        .appointment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .appointment-section {
+            min-width: 0;
+        }
+
+        .appointment-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .appointment-section-header h2 {
+            margin-bottom: 0;
+        }
+
+        .appointment-count {
+            background: #E8F1FB;
+            color: #1D5FA7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .appointment-search {
+            margin-bottom: 15px;
+        }
+
+        .appointment-scroll {
+            height: 400px;
+            overflow-y: auto;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #B5C9DF #F4F7FB;
+        }
+
+        .appointment-scroll::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .appointment-scroll::-webkit-scrollbar-thumb {
+            background: #B5C9DF;
+            border-radius: 10px;
+        }
+
+        .appointment-scroll::-webkit-scrollbar-track {
+            background: #F4F7FB;
+        }
+
+        .appointment-summary {
+            background: #F8FAFD;
+            border: 1px solid #D9E4F1;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .appointment-summary h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .appointment-summary p {
+            font-size: 13px;
+            color: #64748B;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .appointment-view-button {
+            background: #1D5FA7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .appointment-view-button:hover {
+            background: #164D89;
+        }
+
+        /* Appointment details popup */
+
+        .appointment-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 45, 78, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .appointment-modal-content {
+            background: white;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            border-radius: 12px;
+        }
+
+        .appointment-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .appointment-modal-header h2 {
+            margin-bottom: 0;
+        }
+
+        .appointment-close {
+            background: transparent;
+            border: none;
+            color: #64748B;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .appointment-detail-row {
+            margin-bottom: 14px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .appointment-detail-row strong {
+            display: block;
+            color: #142D4E;
+            margin-bottom: 3px;
+        }
+
+        @media (max-width: 1000px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .appointment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 18px;
+            }
+
+            .brand {
+                padding-bottom: 18px;
+            }
+
+            .nav-links {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .logout {
+                display: block;
+                margin-top: 12px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">MedSync</div>
+
+        <nav class="nav-links" id="navigation">
+            <a href="#dashboard" data-page="dashboard" class="active">Dashboard</a>
+            <a href="#patients" data-page="patients">My Patients</a>
+            <a href="#requests" data-page="requests">Patient Requests</a>
+            <a href="#prescriptions" data-page="prescriptions">Prescriptions</a>
+            <a href="#appointments" data-page="appointments">Appointments</a>
+            <a href="#reports" data-page="reports">Medical Reports</a>
+            <a href="#profile" data-page="profile">My Profile</a>
+        </nav>
+
+        <a href="#" class="logout" id="logout">Logout</a>
+    </aside>
+
+    <main class="main">
+
+        <!-- Dashboard -->
+        <section class="view" id="dashboard">
+            <header class="topbar">
+                <h1 id="welcome">Doctor Dashboard</h1>
+                <p class="muted">
+                    Manage your patients, prescriptions and appointments.
+                </p>
+            </header>
+
+            <div class="stats">
+                <article class="stat">
+                    <p>Total Patients</p>
+                    <h2>--</h2>
+                </article>
+
+                <article class="stat">
+                    <p>Pending Requests</p>
+                    <h2>--</h2>
+                </article>
+
+                <article class="stat">
+                    <p>Today's Appointments</p>
+                    <h2>--</h2>
+                </article>
+
+                <article class="stat">
+                    <p>Prescriptions Issued</p>
+                    <h2>--</h2>
+                </article>
+            </div>
+
+            <div class="grid">
+                <article class="panel">
+                    <h2>Quick Actions</h2>
+
+                    <div class="actions">
+                        <button class="action" data-go="patients">
+                            View My Patients
+                        </button>
+
+                        <button class="action" data-go="requests">
+                            Review Patient Requests
+                        </button>
+
+                        <button class="action" data-go="prescriptions">
+                            Create Prescription
+                        </button>
+
+                        <button class="action" data-go="appointments">
+                            Manage Appointments
+                        </button>
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <h2>Upcoming Appointments</h2>
+                    <p class="empty">
+                        Appointment data will appear when the backend is connected.
+                    </p>
+                </article>
+
+                <article class="panel">
+                    <h2>Pending Patient Requests</h2>
+                    <p class="empty">
+                        Patient requests will appear when the consultation API is connected.
+                    </p>
+                </article>
+
+                <article class="panel">
+                    <h2>Recent Activity</h2>
+                    <p class="empty">
+                        Recent activity will appear here when connected.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Patients -->
+        <section class="view" id="patients" hidden>
+            <header class="topbar">
+                <h1>My Patients</h1>
+                <p class="muted">View and manage your patient list.</p>
+            </header>
+
+            <article class="panel">
+                <p class="empty">
+                    Patient records will appear when connected to the backend.
+                </p>
+            </article>
+        </section>
+
+        <!-- Patient Requests -->
+        <section class="view" id="requests" hidden>
+            <header class="topbar">
+                <h1>Patient Requests</h1>
+                <p class="muted">Review consultation requests.</p>
+            </header>
+
+            <article class="panel">
+                <p class="empty">
+                    Requests will appear when the consultation API is connected.
+                </p>
+            </article>
+        </section>
+
+        <!-- Prescriptions -->
+        <section class="view" id="prescriptions" hidden>
+            <header class="topbar">
+                <h1>Prescriptions</h1>
+                <p class="muted">Prepare a prescription for a patient.</p>
+            </header>
+
+            <article class="panel">
+                <form id="prescriptionForm">
+                    <label for="appointmentId">Select Confirmed Appointment</label>
+                    <select id="appointmentId" required style="width:100%;padding:12px;border:1px solid #D9E4F1;border-radius:6px;margin-bottom:16px;font-size:14px;">
+                        <option value="">Select an appointment</option>
+                    </select>
+
+                    <label for="diagnosis">Diagnosis</label>
+                    <input id="diagnosis" required>
+
+                    <label for="medicine">Medicine and dosage</label>
+                    <textarea id="medicine" required></textarea>
+
+                    <label for="instructions">Additional instructions</label>
+                    <textarea id="instructions"></textarea>
+
+                    <button class="primary" type="submit">
+                        Prepare Prescription
+                    </button>
+
+                    <p class="message" id="prescriptionMessage">
+                        Prescription saving requires backend integration.
+                    </p>
+                </form>
+            </article>
+        </section>
+
+        <!-- Appointments -->
+        <section class="view" id="appointments" hidden>
+
+            <header class="topbar">
+                <h1>Appointments</h1>
+                <p class="muted">
+                    Review patient appointment requests, confirm visits
+                    and close completed appointments.
+                </p>
+            </header>
+
+            <div class="appointment-grid">
+
+                <!-- Pending Appointments -->
+                <article class="panel appointment-section">
+
+                    <div class="appointment-section-header">
+                        <h2>Pending Appointments</h2>
+                        <span class="appointment-count" id="pendingCount">0</span>
+                    </div>
+
+                    <input
+                        type="search"
+                        class="appointment-search"
+                        id="pendingSearch"
+                        placeholder="Search patient name or appointment ID..."
+                        autocomplete="off"
+                    >
+
+                    <div class="appointment-scroll" id="pendingAppointments">
+                        <p class="empty">Loading appointment requests...</p>
+                    </div>
+
+                </article>
+
+                <!-- Confirmed Appointments -->
+                <article class="panel appointment-section">
+
+                    <div class="appointment-section-header">
+                        <h2>Confirmed Appointments</h2>
+                        <span class="appointment-count" id="confirmedCount">0</span>
+                    </div>
+
+                    <input
+                        type="search"
+                        class="appointment-search"
+                        id="confirmedSearch"
+                        placeholder="Search patient name or appointment ID..."
+                        autocomplete="off"
+                    >
+
+                    <div class="appointment-scroll" id="confirmedAppointments">
+                        <p class="empty">Loading confirmed appointments...</p>
+                    </div>
+
+                </article>
+
+            </div>
+
+            <!-- Appointment History -->
+            <article class="panel appointment-section">
+
+                <div class="appointment-section-header">
+                    <h2>Appointment History</h2>
+                    <span class="appointment-count" id="historyCount">0</span>
+                </div>
+
+                <input
+                    type="search"
+                    class="appointment-search"
+                    id="historySearch"
+                    placeholder="Search patient name or appointment ID..."
+                    autocomplete="off"
+                >
+
+                <div class="appointment-scroll" id="appointmentHistory">
+                    <p class="empty">Loading appointment history...</p>
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- Medical Reports -->
+        <section class="view" id="reports" hidden>
+            <header class="topbar">
+                <h1>Medical Reports</h1>
+                <p class="muted">Prepare report notes and advice.</p>
+            </header>
+
+            <article class="panel">
+                <form id="reportForm">
+                    <label for="reportPatient">Patient ID</label>
+                    <input id="reportPatient" type="number" min="1" required>
+
+                    <label for="reportNotes">Report notes or advice</label>
+                    <textarea id="reportNotes" required></textarea>
+
+                    <button class="primary" type="submit">
+                        Prepare Report Notes
+                    </button>
+
+                    <p class="message" id="reportMessage">
+                        Report storage requires backend integration.
+                    </p>
+                </form>
+            </article>
+        </section>
+
+        <!-- Profile -->
+        <section class="view" id="profile" hidden>
+            <header class="topbar">
+                <h1>My Profile</h1>
+                <p class="muted">Review your professional details.</p>
+            </header>
+
+            <article class="panel">
+                <form id="profileForm">
+                    <label for="doctorName">Full Name</label>
+                    <input id="doctorName" required>
+
+                    <label for="doctorEmail">Email Address</label>
+                    <input id="doctorEmail" type="email">
+
+                    <label for="doctorPhone">Phone</label>
+                    <input id="doctorPhone" type="tel">
+
+                    <label for="specialty">Specialization</label>
+                    <input id="specialty">
+
+                    <label for="registration">Registration Number</label>
+                    <input id="registration">
+
+                    <button class="primary" type="submit">
+                        Save Profile
+                    </button>
+
+                    <p class="message" id="profileMessage">
+                        Profile changes are saved in this browser only.
+                    </p>
+                </form>
+            </article>
+        </section>
+
+    </main>
+
+    <!-- Appointment Details Popup -->
+    <div class="appointment-modal" id="appointmentModal" hidden>
+
+        <div
+            class="appointment-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="appointmentModalTitle"
+        >
+
+            <div class="appointment-modal-header">
+
+                <h2 id="appointmentModalTitle">Appointment Details</h2>
+
+                <button
+                    type="button"
+                    class="appointment-close"
+                    id="closeAppointmentModal"
+                    aria-label="Close appointment details"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+            <div id="appointmentModalBody"></div>
+
+            <div
+                class="appointment-actions"
+                id="appointmentModalActions"
+            ></div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const pages = [
+            "dashboard",
+            "patients",
+            "requests",
+            "prescriptions",
+            "appointments",
+            "reports",
+            "profile"
+        ];
+
+        const api = async (url, options = {}) => {
+            const r = await fetch(url, {
+                credentials: "same-origin",
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            const t = await r.text();
+            let d = {};
+
+            if (t) {
+                try {
+                    d = JSON.parse(t);
+                } catch {
+                    d = { message: t };
+                }
+            }
+
+            if (!r.ok) {
+                throw Error(
+                    d.message || d.error || `Request failed (${r.status})`
+                );
+            }
+
+            return d;
+        };
+
+        const safe = v =>
+            String(v ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[c]));
+
+        function showPage(page) {
+            if (!pages.includes(page)) {
+                page = "dashboard";
+            }
+
+            pages.forEach(id => {
+                const el = document.getElementById(id);
+
+                if (el) {
+                    el.hidden = id !== page;
+                }
+            });
+
+            document.querySelectorAll("[data-page]").forEach(a => {
+                a.classList.toggle(
+                    "active",
+                    a.dataset.page === page
+                );
+            });
+
+            if (location.hash !== "#" + page) {
+                history.replaceState(null, "", "#" + page);
+            }
+
+            if (
+                ["patients", "requests", "prescriptions", "appointments"]
+                    .includes(page)
+            ) {
+                loadPage(page).catch(e => {
+                    if (page === "appointments") {
+                        showAppointmentError(e.message);
+                    } else {
+                        statusFor(page, e.message, true);
+                    }
+                });
+            }
+        }
+
+        function statusFor(page, msg, error = false) {
+            const id = {
+                prescriptions: "prescriptionMessage",
+                reports: "reportMessage",
+                profile: "profileMessage"
+            }[page];
+
+            const el = id && document.getElementById(id);
+
+            if (el) {
+                el.textContent = msg;
+                el.classList.toggle("error", error);
+            }
+        }
+
+        function listBox(page) {
+            const el = document.getElementById(page);
+
+            let box = el.querySelector("[data-live-list]");
+
+            if (!box) {
+                box = document.createElement("div");
+                box.dataset.liveList = "1";
+                el.appendChild(box);
+            }
+
+            return box;
+        }
+
+        function render(box, items, empty) {
+            box.innerHTML = items.length
+                ? items.map(o => `
+                    <article class="panel" style="margin-top:12px">
+                        ${Object.entries(o || {})
+                            .filter(([k]) =>
+                                !k.toLowerCase().includes("password")
+                            )
+                            .map(([k, v]) => `
+                                <p>
+                                    <strong>
+                                        ${safe(k.replace(/([A-Z])/g, " $1"))}:
+                                    </strong>
+                                    ${safe(
+                                        v && typeof v === "object"
+                                            ? (v.fullName || v.name || JSON.stringify(v))
+                                            : v
+                                    )}
+                                </p>
+                            `).join("")}
+                    </article>
+                `).join("")
+                : `<p class="empty">${safe(empty)}</p>`;
+        }
+
+        // Existing page loading
+
+        async function loadPage(page) {
+
+            if (page === "appointments") {
+                await loadDoctorAppointments();
+                return;
+            }
+
+            if (page === "prescriptions") {
+                await loadPrescriptionAppointments();
+                const data = await api("/api/prescriptions/mine");
+
+                render(
+                    listBox(page),
+                    data,
+                    "No prescriptions issued yet."
+                );
+
+                return;
+            }
+
+            if (page === "patients" || page === "requests") {
+                const data = await api("/api/appointments/mine");
+
+                const filtered = page === "requests"
+                    ? data.filter(a => a.status === "PENDING")
+                    : data;
+
+                render(
+                    listBox(page),
+                    filtered,
+                    page === "requests"
+                        ? "No pending appointment requests."
+                        : "Patients will appear after appointments are booked."
+                );
+
+                return;
+            }
+        }
+
+        // =============================================
+        // DOCTOR APPOINTMENT MANAGEMENT
+        // =============================================
+
+        let doctorAppointments = [];
+
+        function formatAppointmentDate(value) {
+            if (!value) {
+                return "Not specified";
+            }
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
+
+            return date.toLocaleString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+        function showAppointmentError(message) {
+            const pendingBox =
+                document.getElementById("pendingAppointments");
+
+            const confirmedBox =
+                document.getElementById("confirmedAppointments");
+
+            const historyBox =
+                document.getElementById("appointmentHistory");
+
+            pendingBox.innerHTML = `
+                <p class="appointment-error">
+                    ${safe(message)}
+                </p>
+            `;
+
+            confirmedBox.innerHTML = `
+                <p class="empty">
+                    Unable to load appointments.
+                </p>
+            `;
+
+            historyBox.innerHTML = `
+                <p class="empty">
+                    Unable to load appointment history.
+                </p>
+            `;
+        }
+
+        async function loadDoctorAppointments() {
+
+            try {
+                const appointments =
+                    await api("/api/appointments/mine");
+
+                if (!Array.isArray(appointments)) {
+                    throw new Error("Invalid appointment data received.");
+                }
+
+                doctorAppointments = appointments;
+
+                displayAppointmentSections();
+
+            } catch (error) {
+                showAppointmentError(error.message);
+            }
+        }
+
+
+        function filterAppointments(appointments, searchText) {
+
+            const query = searchText.trim().toLowerCase();
+
+            if (!query) {
+                return appointments;
+            }
+
+            return appointments.filter(appointment => {
+
+                const patientName =
+                    appointment.patient?.fullName ||
+                    appointment.patient?.name ||
+                    "";
+
+                const appointmentId =
+                    String(appointment.id ?? "");
+
+                return (
+                    patientName.toLowerCase().includes(query) ||
+                    appointmentId.includes(query)
+                );
+            });
+        }
+
+
+        function displayAppointmentSections() {
+
+            const pending = doctorAppointments.filter(
+                appointment => appointment.status === "PENDING"
+            );
+
+            const confirmed = doctorAppointments.filter(
+                appointment => appointment.status === "CONFIRMED"
+            );
+
+            const history = doctorAppointments.filter(
+                appointment => [
+                    "COMPLETED",
+                    "REJECTED",
+                    "CANCELLED"
+                ].includes(appointment.status)
+            );
+
+            document.getElementById("pendingCount").textContent =
+                pending.length;
+
+            document.getElementById("confirmedCount").textContent =
+                confirmed.length;
+
+            document.getElementById("historyCount").textContent =
+                history.length;
+
+            const pendingSearch =
+                document.getElementById("pendingSearch").value;
+
+            const confirmedSearch =
+                document.getElementById("confirmedSearch").value;
+
+            const historySearch =
+                document.getElementById("historySearch").value;
+
+            renderAppointmentSummaries(
+                document.getElementById("pendingAppointments"),
+                filterAppointments(pending, pendingSearch),
+                "No pending appointments found."
+            );
+
+            renderAppointmentSummaries(
+                document.getElementById("confirmedAppointments"),
+                filterAppointments(confirmed, confirmedSearch),
+                "No confirmed appointments found."
+            );
+
+            renderAppointmentSummaries(
+                document.getElementById("appointmentHistory"),
+                filterAppointments(history, historySearch),
+                "No appointment history found."
+            );
+        }
+
+
+        function renderAppointmentSummaries(
+            container,
+            appointments,
+            emptyMessage
+        ) {
+
+            if (appointments.length === 0) {
+                container.innerHTML = `
+                    <p class="empty">${safe(emptyMessage)}</p>
+                `;
+                return;
+            }
+
+            container.innerHTML = appointments.map(appointment => {
+
+                const patientName =
+                    appointment.patient?.fullName ||
+                    appointment.patient?.name ||
+                    "Unknown Patient";
+
+                const appointmentDate =
+                    formatAppointmentDate(appointment.appointmentTime);
+
+                const status = appointment.status || "UNKNOWN";
+
+                return `
+                    <div class="appointment-summary">
+
+                        <h3>${safe(patientName)}</h3>
+
+                        <p>
+                            <strong>Appointment ID:</strong>
+                            ${safe(appointment.id)}
+                        </p>
+
+                        <p>
+                            <strong>Date:</strong>
+                            ${safe(appointmentDate)}
+                        </p>
+
+                        <p>
+                            <span class="appointment-status ${safe(status.toLowerCase())}">
+                                ${safe(status)}
+                            </span>
+                        </p>
+
+                        <button
+                            type="button"
+                            class="appointment-view-button"
+                            data-view-appointment="${safe(appointment.id)}"
+                        >
+                            View Details
+                        </button>
+
+                    </div>
+                `;
+
+            }).join("");
+        }
+
+
+        function viewDoctorAppointment(id) {
+
+            const appointment = doctorAppointments.find(
+                item => Number(item.id) === Number(id)
+            );
+
+            if (!appointment) {
+                alert("Appointment not found.");
+                return;
+            }
+
+            const patientName =
+                appointment.patient?.fullName ||
+                appointment.patient?.name ||
+                "Unknown Patient";
+
+            const appointmentDate =
+                formatAppointmentDate(appointment.appointmentTime);
+
+            const status = appointment.status || "UNKNOWN";
+
+            const modal =
+                document.getElementById("appointmentModal");
+
+            const modalBody =
+                document.getElementById("appointmentModalBody");
+
+            const modalActions =
+                document.getElementById("appointmentModalActions");
+
+            modalBody.innerHTML = `
+
+                <div class="appointment-detail-row">
+                    <strong>Appointment ID</strong>
+                    ${safe(appointment.id)}
+                </div>
+
+                <div class="appointment-detail-row">
+                    <strong>Patient Name</strong>
+                    ${safe(patientName)}
+                </div>
+
+                <div class="appointment-detail-row">
+                    <strong>Date & Time</strong>
+                    ${safe(appointmentDate)}
+                </div>
+
+                <div class="appointment-detail-row">
+                    <strong>Reason for Visit</strong>
+                    ${safe(appointment.reason || "Not provided")}
+                </div>
+
+                <div class="appointment-detail-row">
+                    <strong>Status</strong>
+                    <span class="appointment-status ${safe(status.toLowerCase())}">
+                        ${safe(status)}
+                    </span>
+                </div>
+
+            `;
+
+            if (status === "PENDING") {
+
+                modalActions.innerHTML = `
+
+                    <button
+                        type="button"
+                        class="primary accept-button"
+                        data-appointment-id="${safe(appointment.id)}"
+                        data-appointment-status="CONFIRMED"
+                    >
+                        Accept Appointment
+                    </button>
+
+                    <button
+                        type="button"
+                        class="primary decline-button"
+                        data-appointment-id="${safe(appointment.id)}"
+                        data-appointment-status="REJECTED"
+                    >
+                        Decline Appointment
+                    </button>
+
+                `;
+
+            } else if (status === "CONFIRMED") {
+
+                modalActions.innerHTML = `
+
+                    <button
+                        type="button"
+                        class="primary complete-button"
+                        data-appointment-id="${safe(appointment.id)}"
+                        data-appointment-status="COMPLETED"
+                    >
+                        Complete Appointment
+                    </button>
+
+                `;
+
+            } else {
+
+                modalActions.innerHTML = `
+                    <p class="empty">
+                        This appointment is closed.
+                    </p>
+                `;
+            }
+
+            modal.hidden = false;
+        }
+
+        function closeDoctorAppointmentModal() {
+            document.getElementById("appointmentModal").hidden = true;
+        }
+
+
+        async function updateDoctorAppointment(id, status, button) {
+
+            const confirmationMessages = {
+                CONFIRMED: "Accept this appointment request?",
+                REJECTED: "Decline this appointment request?",
+                COMPLETED: "Mark this appointment as completed and close the ticket?"
+            };
+
+            if (!confirmationMessages[status]) {
+                return;
+            }
+
+            if (!confirm(confirmationMessages[status])) {
+                return;
+            }
+
+            button.disabled = true;
+
+            const originalText = button.textContent;
+
+            button.textContent = "Updating...";
+
+            try {
+
+                await api(`/api/appointments/${id}/status`, {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                        status: status
+                    })
+                });
+
+                closeDoctorAppointmentModal();
+
+                await loadDoctorAppointments();
+
+            } catch (error) {
+
+                alert("Unable to update appointment: " + error.message);
+
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+
+        document.getElementById("pendingSearch")
+            .addEventListener("input", displayAppointmentSections);
+
+        document.getElementById("confirmedSearch")
+            .addEventListener("input", displayAppointmentSections);
+
+        document.getElementById("historySearch")
+            .addEventListener("input", displayAppointmentSections);
+
+
+        document.getElementById("appointments")
+            .addEventListener("click", event => {
+
+                const button = event.target.closest(
+                    "[data-view-appointment]"
+                );
+
+                if (!button) {
+                    return;
+                }
+
+                const id = Number(button.dataset.viewAppointment);
+
+                viewDoctorAppointment(id);
+            });
+
+        
+
+        document.getElementById("appointmentModalActions")
+            .addEventListener("click", async event => {
+
+                const button = event.target.closest(
+                    "[data-appointment-id][data-appointment-status]"
+                );
+
+                if (!button || button.disabled) {
+                    return;
+                }
+
+                const id = Number(button.dataset.appointmentId);
+
+                const status = button.dataset.appointmentStatus;
+
+                await updateDoctorAppointment(id, status, button);
+            });
+
+        
+
+        document.getElementById("closeAppointmentModal")
+            .addEventListener("click", closeDoctorAppointmentModal);
+
+        document.getElementById("appointmentModal")
+            .addEventListener("click", event => {
+
+                if (event.target.id === "appointmentModal") {
+                    closeDoctorAppointmentModal();
+                }
+            });
+
+        document.addEventListener("keydown", event => {
+
+            if (event.key === "Escape") {
+                closeDoctorAppointmentModal();
+            }
+        });
+
+       
+
+        document.querySelectorAll("[data-page]").forEach(a =>
+            a.addEventListener("click", e => {
+                e.preventDefault();
+                showPage(a.dataset.page);
+            })
+        );
+
+        document.querySelectorAll("[data-go]").forEach(b =>
+            b.addEventListener("click", () => showPage(b.dataset.go))
+        );
+
+        window.addEventListener(
+            "hashchange",
+            () => showPage(location.hash.slice(1))
+        );
+
+        
+
+        async function init() {
+            try {
+                const user = await api("/api/auth/me");
+
+                if (user.role !== "DOCTOR") {
+                    await api("/api/auth/logout", {
+                        method: "POST"
+                    });
+
+                    location.replace("doctor-access.html");
+                    return;
+                }
+
+                document.getElementById("welcome").textContent =
+                    "Welcome Back, " +
+                    (user.fullName || "Doctor") +
+                    (
+                        user.verified === false
+                            ? " — awaiting administrator verification."
+                            : ""
+                    );
+
+                document.getElementById("doctorName").value =
+                    user.fullName || "";
+
+                document.getElementById("doctorEmail").value =
+                    user.email || "";
+
+                document.getElementById("doctorPhone").value =
+                    user.phone || "";
+
+                document.getElementById("specialty").value =
+                    user.specialty || "";
+
+                document.getElementById("registration").value =
+                    user.licenseNumber || "";
+
+            } catch (e) {
+                location.replace("doctor-access.html");
+            }
+        }
+
+       
+
+        async function loadPrescriptionAppointments() {
+            const select = document.getElementById("appointmentId");
+            select.innerHTML = '<option value="">Select an appointment</option>';
+            try {
+                const appointments = await api("/api/appointments/mine");
+                appointments.filter(a => a.status === "CONFIRMED").forEach(a => {
+                    const option = document.createElement("option");
+                    option.value = a.id;
+                    option.dataset.patientId = a.patient.id;
+                    option.textContent = `#${a.id} - ${a.patient.fullName || a.patient.name || "Patient"}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                statusFor("prescriptions", error.message, true);
+            }
+        }
+
+        document.getElementById("prescriptionForm")
+            .addEventListener("submit", async e => {
+
+                e.preventDefault();
+
+                try {
+                    const raw =
+                        document.getElementById("medicine").value.trim();
+
+                    const items = raw
+                        .split(/\n|,/)
+                        .map(x => x.trim())
+                        .filter(Boolean)
+                        .map(line => {
+
+                            const parts = line
+                                .split("|")
+                                .map(x => x.trim());
+
+                            return {
+                                medicineName: parts[0],
+                                dosage: parts[1] || "As prescribed",
+                                frequency: parts[2] || "As prescribed",
+                                duration: parts[3] || "As prescribed",
+                                instructions:
+                                    document.getElementById("instructions")
+                                        .value.trim()
+                            };
+                        });
+
+                    await api("/api/prescriptions", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            appointmentId: Number(document.getElementById("appointmentId").value),
+                            patientId: Number(document.getElementById("appointmentId").selectedOptions[0].dataset.patientId),
+                            notes:
+                                document.getElementById("diagnosis")
+                                    .value.trim(),
+                            items
+                        })
+                    });
+
+                    statusFor(
+                        "prescriptions",
+                        "Prescription saved successfully."
+                    );
+
+                    e.target.reset();
+
+                } catch (err) {
+                    statusFor("prescriptions", err.message, true);
+                }
+            });
+
+       
+
+        document.getElementById("reportForm")
+            .addEventListener("submit", async e => {
+
+                e.preventDefault();
+
+                try {
+                    await api("/api/doctor/records", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            patientId:
+                                document.getElementById("reportPatient").value,
+                            title: "Medical report / advice",
+                            notes:
+                                document.getElementById("reportNotes")
+                                    .value.trim()
+                        })
+                    });
+
+                    statusFor(
+                        "reports",
+                        "Medical report notes saved successfully."
+                    );
+
+                    e.target.reset();
+
+                } catch (err) {
+                    statusFor("reports", err.message, true);
+                }
+            });
+
+        
+
+        document.getElementById("profileForm")
+            .addEventListener("submit", e => {
+
+                e.preventDefault();
+
+                statusFor(
+                    "profile",
+                    "Profile editing is not available because the existing backend has no profile-update endpoint."
+                );
+            });
+
+      
+
+        document.getElementById("logout")
+            .addEventListener("click", async e => {
+
+                e.preventDefault();
+
+                try {
+                    await api("/api/auth/logout", {
+                        method: "POST"
+                    });
+                } finally {
+                    location.replace("doctor-access.html");
+                }
+            });
+
+        init();
+
+        showPage(location.hash.slice(1) || "dashboard");
+
+    </script>
+</body>
+</html>

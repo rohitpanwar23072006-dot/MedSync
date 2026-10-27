@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        header {
+            padding: 24px 35px;
+            background: #142D4E;
+            color: white;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 35px 25px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 25px;
+            padding: 11px 18px;
+            background: #1D5FA7;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 22px 0;
+        }
+
+        input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 1px solid #D6DFEB;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            padding: 11px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #1D5FA7;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover,
+        .back-button:hover {
+            background: #164A83;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .user-card {
+            padding: 22px;
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(20, 45, 78, 0.04);
+            overflow-wrap: anywhere;
+        }
+
+        .user-card h2 {
+            margin: 0 0 14px;
+            font-size: 20px;
+        }
+
+        .user-card p {
+            margin: 8px 0;
+            color: #52647B;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 18px;
+        }
+
+        .approve {
+            background: #218653;
+        }
+
+        .approve:hover {
+            background: #176B40;
+        }
+
+        .reject,
+        .deactivate {
+            background: #C62828;
+        }
+
+        .reject:hover,
+        .deactivate:hover {
+            background: #A51F1F;
+        }
+
+        .status {
+            margin: 18px 0;
+            color: #64748B;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            color: #C62828;
+        }
+
+        footer {
+            padding: 20px;
+            background: #142D4E;
+            color: white;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 22px 18px;
+            }
+
+            main {
+                padding: 28px 16px;
+            }
+
+            .user-card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>MedSync | User Management</h1>
+    </header>
+
+    <main>
+        <a class="back-button" href="admin-dashboard.html">
+            ← Back to Admin Dashboard
+        </a>
+
+        <h2>Registered Users</h2>
+        <p>Manage accounts and verify registered doctors.</p>
+
+        <div class="toolbar">
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search by name or email..."
+                aria-label="Search users"
+            >
+            <button type="button" id="searchButton">Search</button>
+            <button type="button" id="refreshButton">Refresh</button>
+        </div>
+
+        <p id="status" class="status" aria-live="polite">
+            Loading users...
+        </p>
+
+        <section id="userList" class="user-list"></section>
+    </main>
+
+    <footer>MedSync Healthcare Management System</footer>
+
+    <script>
+        const statusMessage = document.getElementById('status');
+        const userList = document.getElementById('userList');
+        const searchInput = document.getElementById('searchInput');
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { message: text };
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    data.error ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            return data;
+        }
+
+        function addText(parent, tag, text, className = '') {
+            const element = document.createElement(tag);
+            element.textContent = text;
+
+            if (className) {
+                element.className = className;
+            }
+
+            parent.appendChild(element);
+            return element;
+        }
+
+        function addAction(parent, text, className, action) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = text;
+            button.className = className;
+            button.addEventListener('click', action);
+            parent.appendChild(button);
+        }
+
+        function displayUsers(users) {
+            userList.replaceChildren();
+
+            if (!Array.isArray(users) || users.length === 0) {
+                statusMessage.textContent = 'No users found.';
+                return;
+            }
+
+            statusMessage.textContent = `${users.length} user(s) found.`;
+
+            users.forEach(user => {
+                const card = document.createElement('article');
+                card.className = 'user-card';
+
+                addText(
+                    card,
+                    'h2',
+                    user.fullName || user.name || 'Unnamed user'
+                );
+
+                addText(card, 'p', `Email: ${user.email || 'Not available'}`);
+                addText(card, 'p', `Role: ${user.role || 'Not available'}`);
+
+                if (user.id !== undefined && user.id !== null) {
+                    addText(card, 'p', `User ID: ${user.id}`);
+                }
+
+                if (user.verified !== undefined) {
+                    addText(
+                        card,
+                        'p',
+                        `Doctor verification: ${
+                            user.verified ? 'Verified' : 'Pending / Not verified'
+                        }`
+                    );
+                }
+
+                if (user.active !== undefined) {
+                    addText(
+                        card,
+                        'p',
+                        `Account status: ${user.active ? 'Active' : 'Inactive'}`
+                    );
+                }
+
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                if (
+                    user.role === 'DOCTOR' &&
+                    !user.verified &&
+                    user.id !== undefined
+                ) {
+                    addAction(actions, 'Approve Doctor', 'approve', () =>
+                        updateDoctor(user.id, true)
+                    );
+
+                    addAction(actions, 'Reject Doctor', 'reject', () =>
+                        updateDoctor(user.id, false)
+                    );
+                }
+
+                if (
+                    user.role !== 'ADMIN' &&
+                    user.id !== undefined &&
+                    user.active !== undefined
+                ) {
+                    addAction(
+                        actions,
+                        user.active ? 'Deactivate Account' : 'Activate Account',
+                        user.active ? 'deactivate' : '',
+                        () => updateAccount(user.id, !user.active)
+                    );
+                }
+
+                card.appendChild(actions);
+                userList.appendChild(card);
+            });
+        }
+
+        async function loadUsers() {
+            statusMessage.className = 'status';
+            statusMessage.textContent = 'Loading users...';
+            userList.replaceChildren();
+
+            try {
+                const query = searchInput.value.trim();
+                const url = query
+                    ? `/api/admin/users?q=${encodeURIComponent(query)}`
+                    : '/api/admin/users';
+
+                const users = await api(url);
+                displayUsers(users);
+            } catch (error) {
+                statusMessage.textContent = error.message;
+                statusMessage.className = 'status error';
+            }
+        }
+
+        async function updateDoctor(id, approved) {
+            const action = approved ? 'approve' : 'reject';
+
+            if (!confirm(`Are you sure you want to ${action} this doctor?`)) {
+                return;
+            }
+
+            try {
+                await api(`/api/admin/doctors/${id}/verification`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ approved })
+                });
+
+                statusMessage.textContent = approved
+                    ? 'Doctor approved successfully.'
+                    : 'Doctor verification rejected.';
+
+                await loadUsers();
+            } catch (error) {
+                statusMessage.textContent = error.message;
+                statusMessage.className = 'status error';
+            }
+        }
+
+        async function updateAccount(id, active) {
+            const action = active ? 'activate' : 'deactivate';
+
+            if (!confirm(`Are you sure you want to ${action} this account?`)) {
+                return;
+            }
+
+            try {
+                await api(`/api/admin/users/${id}/active`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active })
+                });
+
+                statusMessage.textContent = 'Account status updated.';
+                await loadUsers();
+            } catch (error) {
+                statusMessage.textContent = error.message;
+                statusMessage.className = 'status error';
+            }
+        }
+
+        document.getElementById('searchButton')
+            .addEventListener('click', loadUsers);
+
+        document.getElementById('refreshButton')
+            .addEventListener('click', loadUsers);
+
+        searchInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                loadUsers();
+            }
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>

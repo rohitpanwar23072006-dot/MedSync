@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSync | Pharmacist Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        .sidebar {
+            width: 245px;
+            height: 100vh;
+            position: fixed;
+            background: #142D4E;
+            padding: 28px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            padding: 0 12px;
+            margin-bottom: 35px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-links a,
+        .logout {
+            display: block;
+            padding: 13px 15px;
+            border-radius: 6px;
+            color: #DCE6F2;
+            text-decoration: none;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active,
+        .logout:hover {
+            background: #285D99;
+            color: white;
+        }
+
+        .logout {
+            margin-top: auto;
+        }
+
+        main {
+            margin-left: 245px;
+            width: calc(100% - 245px);
+            padding: 30px;
+        }
+
+        header {
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .muted {
+            color: #64748B;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #64748B;
+            line-height: 1.7;
+            margin-bottom: 22px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            background: #1D5FA7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #285D99;
+        }
+
+        .alerts {
+            margin-bottom: 22px;
+        }
+
+        .alert {
+            background: #FFF4DB;
+            border: 1px solid #F5D38A;
+            color: #865900;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .alert.danger {
+            background: #FDECEC;
+            border-color: #F4B4B4;
+            color: #B42318;
+        }
+
+        .alert.success {
+            background: #EAF8EF;
+            border-color: #B5E0C3;
+            color: #17663A;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .logout {
+                margin-top: 20px;
+            }
+
+            main {
+                margin-left: 0;
+                width: 100%;
+                padding: 18px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <a href="/index.html" class="logo">MedSync</a>
+
+        <nav class="nav-links">
+            <a href="pharmacist-dashboard.html" class="active">Dashboard</a>
+            <a href="pharmacist-inventory.html">Medicine Inventory</a>
+            <a href="pharmacist-orders.html">Prescription Orders</a>
+            <a href="pharmacist-add-medicine.html">Add Medicine</a>
+            <a href="pharmacist-profile.html">My Profile</a>
+        </nav>
+
+        <button class="logout" onclick="logout()">Logout</button>
+
+    </aside>
+
+    <main>
+
+        <header>
+            <h1>Pharmacist Dashboard</h1>
+            <p class="muted" id="welcome">Loading your account...</p>
+        </header>
+
+        <div class="alerts" id="alerts"></div>
+
+        <section class="cards">
+
+            <div class="card">
+                <h2>Medicine Inventory</h2>
+                <p>View medicines, search inventory, check stock and expiry dates.</p>
+                <a href="pharmacist-inventory.html" class="btn">
+                    Medicine Inventory
+                </a>
+            </div>
+
+            <div class="card">
+                <h2>Prescription Orders</h2>
+                <p>View patient medicine orders and update their delivery status.</p>
+                <a href="pharmacist-orders.html" class="btn">
+                    Prescription Orders
+                </a>
+            </div>
+
+            <div class="card">
+                <h2>My Profile</h2>
+                <p>View your pharmacist account and pharmacy information.</p>
+                <a href="pharmacist-profile.html" class="btn">
+                    View Profile
+                </a>
+            </div>
+
+            <div class="card">
+                <h2>Add Medicine</h2>
+                <p>Add medicines with stock quantity, price, expiry date and description.</p>
+                <a href="pharmacist-add-medicine.html" class="btn">
+                    Add Medicine
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        const LOGIN_URL = "/pages/pharmacist-login.html";
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { message: text };
+                }
+            }
+
+            if (!response.ok) {
+                const error = new Error(
+                    data.error || data.message ||
+                    `Request failed (${response.status})`
+                );
+                error.status = response.status;
+                throw error;
+            }
+
+            return data;
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[c]));
+        }
+
+        async function initialize() {
+            try {
+                const user = await api("/api/auth/me");
+
+                if (user.role !== "PHARMACIST") {
+                    location.replace("/index.html");
+                    return;
+                }
+
+                document.getElementById("welcome").textContent =
+                    `Welcome, ${user.fullName}.`;
+
+                const medicines = await api("/api/pharmacy/my-medicines");
+                const alerts = [];
+
+                medicines.forEach(medicine => {
+                    const stock = Number(medicine.stockQuantity ?? 0);
+                    const threshold = Number(medicine.lowStockThreshold ?? 5);
+
+                    if (stock <= 0) {
+                        alerts.push({
+                            type: "danger",
+                            message: `${medicine.name} is out of stock.`
+                        });
+                    } else if (stock <= threshold) {
+                        alerts.push({
+                            type: "",
+                            message: `Low stock: ${medicine.name} has only ${stock} units remaining.`
+                        });
+                    }
+
+                    if (medicine.expiryDate) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        const expiry = new Date(
+                            String(medicine.expiryDate).slice(0, 10) + "T00:00:00"
+                        );
+
+                        const days = Math.ceil(
+                            (expiry - today) / 86400000
+                        );
+
+                        if (days < 0) {
+                            alerts.push({
+                                type: "danger",
+                                message: `${medicine.name} has expired.`
+                            });
+                        } else if (days <= 30) {
+                            alerts.push({
+                                type: "",
+                                message: `${medicine.name} expires in ${days} days.`
+                            });
+                        }
+                    }
+                });
+
+                const container = document.getElementById("alerts");
+
+                container.innerHTML = alerts.length
+                    ? alerts.map(alert => `
+                        <div class="alert ${alert.type}">
+                            ${escapeHTML(alert.message)}
+                        </div>
+                    `).join("")
+                    : `<div class="alert success">
+                           No low-stock or expiry alerts.
+                       </div>`;
+
+            } catch (error) {
+
+                if (error.status === 401) {
+                    location.replace(LOGIN_URL);
+                    return;
+                }
+
+                document.getElementById("alerts").innerHTML =
+                    `<div class="alert danger">
+                        ${escapeHTML(error.message)}
+                    </div>`;
+            }
+        }
+
+        async function logout() {
+            try {
+                await api("/api/auth/logout", { method: "POST" });
+            } finally {
+                location.replace(LOGIN_URL);
+            }
+        }
+
+        initialize();
+    </script>
+
+</body>
+</html>

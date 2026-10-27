@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Overview | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        header {
+            background: #142D4E;
+            color: white;
+            padding: 24px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: auto;
+            padding: 35px 25px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 25px;
+            padding: 11px 18px;
+            background: #1D5FA7;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .feature-card {
+            padding: 24px;
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+        }
+
+        .feature-card h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        #status {
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        .error {
+            color: #C62828 !important;
+        }
+
+        footer {
+            padding: 20px;
+            background: #142D4E;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>MedSync | System Overview</h1>
+    </header>
+
+    <main>
+        <a class="back-button" href="admin-dashboard.html">
+            ← Back to Admin Dashboard
+        </a>
+
+        <h2>System Statistics</h2>
+        <p>Overview of the MedSync healthcare management system.</p>
+
+        <p id="status">Loading system statistics...</p>
+        <section id="statistics" class="feature-list"></section>
+    </main>
+
+    <footer>MedSync Healthcare Management System</footer>
+
+    <script>
+        async function loadStatistics() {
+            const status = document.getElementById('status');
+            const statistics = document.getElementById('statistics');
+
+            try {
+                const response = await fetch('/api/admin/stats', {
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Unable to load statistics (${response.status}).`);
+                }
+
+                const data = await response.json();
+
+                statistics.innerHTML = '';
+
+                if (!data || typeof data !== 'object' ||
+                    Object.keys(data).length === 0) {
+                    status.textContent = 'No statistics are available yet.';
+                    return;
+                }
+
+                Object.entries(data).forEach(([name, value]) => {
+                    const card = document.createElement('article');
+                    card.className = 'feature-card';
+
+                    const heading = document.createElement('h2');
+                    heading.textContent = name.replace(/([A-Z])/g, ' $1');
+
+                    const description = document.createElement('p');
+                    description.textContent =
+                        value !== null && typeof value === 'object'
+                            ? JSON.stringify(value)
+                            : String(value ?? 'Not available');
+
+                    card.append(heading, description);
+                    statistics.appendChild(card);
+                });
+
+                status.textContent = '';
+            } catch (error) {
+                status.textContent = error.message;
+                status.className = 'error';
+            }
+        }
+
+        loadStatistics();
+    </script>
+</body>
+</html>
+```

@@ -1,0 +1,615 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Dashboard | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F4F7FB;
+            color: #142D4E;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 245px;
+            height: 100vh;
+            padding: 30px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 20px;
+            background: #142D4E;
+            z-index: 10;
+        }
+
+        .brand {
+            color: white;
+            text-decoration: none;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logout-button {
+            padding: 12px 18px;
+            background: #1D5FA7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-button:hover,
+        .action-button:hover {
+            background: #164A83;
+        }
+
+        main {
+            max-width: 1000px;
+            margin-left: 245px;
+            padding: 45px 40px 70px;
+        }
+
+        .welcome {
+            margin-bottom: 32px;
+        }
+
+        .welcome h1 {
+            margin: 0 0 10px;
+            font-size: 34px;
+            line-height: 1.3;
+        }
+
+        .welcome p {
+            margin: 0;
+            color: #64748B;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            width: 100%;
+            min-height: 175px;
+            padding: 26px;
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(20, 45, 78, 0.04);
+        }
+
+        .dashboard-card h2 {
+            margin: 0 0 12px;
+            font-size: 22px;
+        }
+
+        .dashboard-card p {
+            margin: 0 0 20px;
+            color: #64748B;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .action-button {
+            display: inline-block;
+            min-height: 42px;
+            padding: 12px 20px;
+            background: #1D5FA7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .details-panel {
+            margin-top: 30px;
+            padding: 26px;
+            background: white;
+            border: 1px solid #E0E6EF;
+            border-radius: 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .details-panel[hidden] {
+            display: none;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .details-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close-button {
+            padding: 8px 16px;
+            background: #EAF2FF;
+            color: #1D5FA7;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .result-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .result-item {
+            padding: 18px;
+            background: #F7FAFF;
+            border: 1px solid #E0E6EF;
+            border-radius: 7px;
+            overflow-wrap: anywhere;
+        }
+
+        .result-item p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .status-message {
+            color: #64748B;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            color: #C62828;
+        }
+
+        .inline-action {
+            margin: 8px 8px 0 0;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 5px;
+            background: #1D5FA7;
+            color: white;
+            cursor: pointer;
+        }
+
+        footer {
+            margin-left: 245px;
+            min-height: 65px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 18px;
+            background: #142D4E;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            header {
+                position: relative;
+                width: 100%;
+                height: auto;
+                min-height: 75px;
+                padding: 18px 20px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .brand {
+                font-size: 25px;
+            }
+
+            main {
+                margin-left: 0;
+                padding: 30px 18px 45px;
+            }
+
+            .welcome h1 {
+                font-size: 28px;
+            }
+
+            .dashboard-card {
+                padding: 22px;
+            }
+
+            .details-panel {
+                padding: 18px;
+            }
+
+            footer {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="../index.html" class="brand">MedSync</a>
+
+        <button type="button" class="logout-button" id="logoutButton">
+            Logout
+        </button>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h1>Administrator Dashboard</h1>
+            <p id="welcomeMessage">Loading your account...</p>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="dashboard-card">
+                <h2>System Overview</h2>
+                <p>View application counts and pending verification.</p>
+                <a class="action-button" href="system-overview.html">
+                    System Overview
+                </a>
+            </article>
+
+            <article class="dashboard-card">
+                <h2>User Management</h2>
+                <p>Search users and manage account access.</p>
+                <a class="action-button" href="user-management.html">
+                    User Management
+                </a>
+            </article>
+
+            
+
+            <article class="dashboard-card">
+                <h2>Activity Logs</h2>
+                <p>Review important application activity.</p>
+                <a class="action-button" href="activity-logs.html">
+                    Activity Logs
+                </a>
+            </article>
+            
+            <article class="dashboard-card">
+                <h2>Pharmacist Verification</h2>
+                <p>Review pharmacist registration details and manage verification requests.</p>
+                <a class="action-button" href="pharmacist-verification.html">
+                    Pharmacist Verification
+                </a>
+            </article>
+
+            <article class="dashboard-card">
+                <h2>Doctor Verification</h2>
+                <p>Review and approve doctor registration applications.</p>
+                <a class="action-button" href="doctor-verification.html">
+                    Doctor Verification
+                </a>
+            </article>
+
+        </section>
+
+        <section class="details-panel" id="detailsPanel" hidden>
+            <div class="details-header">
+                <h2 id="detailsTitle">Details</h2>
+                <button type="button" class="close-button" id="closeButton">
+                    Close
+                </button>
+            </div>
+
+            <p id="statusMessage" class="status-message" aria-live="polite"></p>
+            <div id="detailsContent"></div>
+        </section>
+    </main>
+
+    <footer>MedSync Healthcare Management System</footer>
+
+    <script>
+        const role = 'ADMIN';
+
+        const cards = {
+            stats: '/api/admin/stats',
+            users: '/api/admin/users',
+            appointments: '/api/admin/appointments',
+            logs: '/api/admin/logs',
+            verification: '/api/admin/users'
+        };
+
+        const panel = document.getElementById('detailsPanel');
+        const title = document.getElementById('detailsTitle');
+        const status = document.getElementById('statusMessage');
+        const content = document.getElementById('detailsContent');
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { message: text };
+                }
+            }
+
+            if (!response.ok) {
+                throw Error(
+                    data.error ||
+                    data.message ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            return data;
+        }
+
+        function safe(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[character]));
+        }
+
+        async function loadProfile() {
+            const me = await api('/api/auth/me');
+
+            if (me.role !== role) {
+                await api('/api/auth/logout', { method: 'POST' });
+                location.replace('admin-login.html');
+                return;
+            }
+
+            document.getElementById('welcomeMessage').textContent =
+                `Welcome, ${me.fullName}. ${
+                    me.verified === false
+                        ? 'Your account is awaiting administrator verification.'
+                        : ''
+                }`;
+        }
+
+        let currentSection = '';
+
+        async function show(key) {
+            currentSection = key;
+            panel.hidden = false;
+            title.textContent = key[0].toUpperCase() + key.slice(1);
+            content.innerHTML = '';
+            status.textContent = 'Loading...';
+            status.className = 'status-message';
+
+            try {
+                const data = await api(cards[key]);
+                status.textContent = '';
+
+                if (key === 'stats') {
+                    content.innerHTML = Object.entries(data)
+                        .map(([name, value]) => `
+                            <article class="result-item">
+                                <strong>
+                                    ${safe(name.replace(/([A-Z])/g, ' $1'))}:
+                                </strong>
+                                ${safe(value)}
+                            </article>
+                        `)
+                        .join('') || 'No summary available.';
+
+                    return;
+                }
+
+                const allItems = Array.isArray(data) ? data : [data];
+
+                const items = key === 'verification'
+                    ? allItems.filter(item =>
+                        ['DOCTOR', 'PHARMACIST'].includes(item.role) &&
+                        item.verified !== true
+                    )
+                    : allItems;
+
+                if (!items.length) {
+                    status.textContent = key === 'verification'
+                        ? 'There are no pending doctor or pharmacist verification requests.'
+                        : 'No records are available yet.';
+                    return;
+                }
+
+                content.innerHTML =
+                    '<div class="result-list">' +
+                    items.map(item => `
+                        <article class="result-item">
+                            ${Object.entries(item || {})
+                                .filter(([name]) =>
+                                    !name.toLowerCase().includes('password')
+                                )
+                                .map(([name, value]) => `
+                                    <p>
+                                        <strong>
+                                            ${safe(name.replace(/([A-Z])/g, ' $1'))}:
+                                        </strong>
+                                        ${safe(
+                                            value && typeof value === 'object'
+                                                ? (value.fullName || value.name ||
+                                                    JSON.stringify(value))
+                                                : value
+                                        )}
+                                    </p>
+                                `).join('')}
+
+                            ${role === 'ADMIN' &&
+                              ['DOCTOR', 'PHARMACIST'].includes(item.role) &&
+                              item.verified !== true ? `
+                                <button class="inline-action"
+                                    data-verify="${item.id}"
+                                    data-verify-role="${item.role}"
+                                    data-approved="true">
+                                    Approve ${item.role.toLowerCase()}
+                                </button>
+
+                                <button class="inline-action"
+                                    data-verify="${item.id}"
+                                    data-verify-role="${item.role}"
+                                    data-approved="false">
+                                    Reject ${item.role.toLowerCase()}
+                                </button>
+                            ` : ''}
+
+                            ${role === 'ADMIN' && item.role !== 'ADMIN' ? `
+                                <button class="inline-action"
+                                    data-active="${item.id}"
+                                    data-value="${!item.active}">
+                                    ${item.active
+                                        ? 'Deactivate account'
+                                        : 'Activate account'}
+                                </button>
+                            ` : ''}
+
+                            ${role === 'DOCTOR' &&
+                              key === 'appointments' &&
+                              item.status === 'PENDING' ? `
+                                <button class="inline-action"
+                                    data-appointment="${item.id}"
+                                    data-status="CONFIRMED">
+                                    Confirm
+                                </button>
+
+                                <button class="inline-action"
+                                    data-appointment="${item.id}"
+                                    data-status="REJECTED">
+                                    Reject
+                                </button>
+                            ` : ''}
+
+                            ${role === 'PHARMACIST' && key === 'orders'
+                                ? ['PROCESSING', 'SHIPPED', 'COMPLETED']
+                                    .map(state => `
+                                        <button class="inline-action"
+                                            data-order="${item.id}"
+                                            data-status="${state}">
+                                            ${state}
+                                        </button>
+                                    `).join('')
+                                : ''}
+                        </article>
+                    `).join('') +
+                    '</div>';
+
+            } catch (error) {
+                status.textContent = error.message;
+                status.className = 'status-message error';
+            }
+        }
+
+        document.querySelectorAll('[data-section]').forEach(button => {
+            button.addEventListener('click', () => show(button.dataset.section));
+        });
+
+        content.addEventListener('click', async event => {
+            const button = event.target.closest('button');
+
+            if (!button) return;
+
+            try {
+                if (button.dataset.verify) {
+                    const accountType =
+                        button.dataset.verifyRole === 'PHARMACIST'
+                            ? 'pharmacists'
+                            : 'doctors';
+
+                    await api(
+                        `/api/admin/${accountType}/${button.dataset.verify}/verification`,
+                        {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                approved: button.dataset.approved === 'true'
+                            })
+                        }
+                    );
+                } else if (button.dataset.active) {
+                    await api(
+                        `/api/admin/users/${button.dataset.active}/active`,
+                        {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                active: button.dataset.value === 'true'
+                            })
+                        }
+                    );
+                } else if (button.dataset.appointment) {
+                    await api(
+                        `/api/appointments/${button.dataset.appointment}/status`,
+                        {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                status: button.dataset.status
+                            })
+                        }
+                    );
+                } else if (button.dataset.order) {
+                    await api(
+                        `/api/pharmacy/orders/${button.dataset.order}`,
+                        {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                status: button.dataset.status
+                            })
+                        }
+                    );
+                }
+
+                await show(currentSection);
+
+            } catch (error) {
+                status.textContent = error.message;
+                status.className = 'status-message error';
+            }
+        });
+
+        document.getElementById('closeButton').addEventListener('click', () => {
+            panel.hidden = true;
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await api('/api/auth/logout', { method: 'POST' });
+            } finally {
+                location.replace('admin-login.html');
+            }
+        });
+
+        loadProfile().catch(() => {
+            location.replace('admin-login.html');
+        });
+    </script>
+</body>
+</html>

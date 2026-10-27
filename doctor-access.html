@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Login | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f7ff;
+            color: #17243a;
+        }
+
+        header {
+            min-height: 72px;
+            padding: 0 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #e3eaf4;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1769e0;
+            text-decoration: none;
+        }
+
+        .home-link {
+            color: #34445a;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        main {
+            min-height: calc(100vh - 137px);
+            padding: 45px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 460px;
+            padding: 38px;
+            background: white;
+            border: 1px solid #e1e9f3;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(25, 55, 90, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            margin: 0 0 28px;
+            color: #68788e;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin: 0 0 8px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            height: 48px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #cfd9e6;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #c5dcff;
+            border-color: #1769e0;
+        }
+
+        button {
+            width: 100%;
+            min-height: 48px;
+            border: none;
+            border-radius: 6px;
+            background: #1769e0;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1056bd;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin: 0 0 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            color: #c62828;
+        }
+
+        .success {
+            color: #167548;
+        }
+
+        .signup-link {
+            margin: 24px 0 0;
+            text-align: center;
+            color: #65758a;
+            font-size: 15px;
+        }
+
+        .signup-link a {
+            color: #1769e0;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            min-height: 65px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            background: #142943;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 500px) {
+            header {
+                padding: 0 20px;
+            }
+
+            .auth-card {
+                padding: 26px 22px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a class="brand" href="/index.html">MedSync</a>
+        <a class="home-link" href="/index.html">Back to Home</a>
+    </header>
+
+    <main>
+        <section class="auth-card">
+
+            <h1 id="pageTitle">Doctor Login</h1>
+
+            <p class="subtitle" id="pageSubtitle">
+                Sign in to access your doctor dashboard.
+            </p>
+
+            <!-- Doctor Login Form -->
+            <form id="loginForm">
+
+                <label for="loginEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="loginEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="loginPassword">Password</label>
+                <input
+                    type="password"
+                    id="loginPassword"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <p id="loginMessage" class="message" aria-live="polite"></p>
+
+                <button type="submit" id="loginButton">
+                    Login
+                </button>
+
+            </form>
+
+            <p class="signup-link" id="loginLink">
+                Don't have an account?
+                <a href="#signup" id="showSignup">Sign Up</a>
+            </p>
+
+            <!-- Doctor Signup Form -->
+            <form id="signupForm" class="hidden">
+
+                <label for="fullName">Full Name</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required
+                >
+
+                <label for="signupEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="signupEmail"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="phone">Phone Number</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    autocomplete="tel"
+                >
+
+                <label for="specialty">Specialization</label>
+                <input
+                    type="text"
+                    id="specialty"
+                    name="specialty"
+                    placeholder="e.g. General Physician"
+                    required
+                >
+
+                <label for="licenseNumber">
+                    Medical Registration / License ID
+                </label>
+                <input
+                    type="text"
+                    id="licenseNumber"
+                    name="licenseNumber"
+                    placeholder="Enter registration ID"
+                    required
+                >
+
+                <label for="signupPassword">Password</label>
+                <input
+                    type="password"
+                    id="signupPassword"
+                    name="password"
+                    placeholder="At least 8 characters"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <p id="signupMessage" class="message" aria-live="polite"></p>
+
+                <button type="submit" id="signupButton">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="signup-link hidden" id="signupLink">
+                Already have an account?
+                <a href="#login" id="showLogin">Login</a>
+            </p>
+
+        </section>
+    </main>
+
+    <footer>MedSync Healthcare Management System</footer>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const signupForm = document.getElementById("signupForm");
+
+        const pageTitle = document.getElementById("pageTitle");
+        const pageSubtitle = document.getElementById("pageSubtitle");
+
+        const loginLink = document.getElementById("loginLink");
+        const signupLink = document.getElementById("signupLink");
+
+        function showForm(mode) {
+            const signup = mode === "signup";
+
+            loginForm.classList.toggle("hidden", signup);
+            signupForm.classList.toggle("hidden", !signup);
+
+            loginLink.classList.toggle("hidden", signup);
+            signupLink.classList.toggle("hidden", !signup);
+
+            pageTitle.textContent = signup
+                ? "Doctor Signup"
+                : "Doctor Login";
+
+            pageSubtitle.textContent = signup
+                ? "Create your doctor account. Verification may be required before using doctor features."
+                : "Sign in to access your doctor dashboard.";
+
+            document.getElementById("loginMessage").textContent = "";
+            document.getElementById("loginMessage").className = "message";
+
+            document.getElementById("signupMessage").textContent = "";
+            document.getElementById("signupMessage").className = "message";
+
+            document.title = signup
+                ? "Doctor Signup | MedSync"
+                : "Doctor Login | MedSync";
+        }
+
+        document.getElementById("showSignup").addEventListener("click", function (event) {
+            event.preventDefault();
+            showForm("signup");
+        });
+
+        document.getElementById("showLogin").addEventListener("click", function (event) {
+            event.preventDefault();
+            showForm("login");
+        });
+
+        async function readResponse(response) {
+            const text = await response.text();
+            let data = {};
+
+            if (text.trim()) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    if (response.ok) {
+                        return { message: text };
+                    }
+
+                    throw new Error(text);
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    data.error ||
+                    "Request failed. Please check your details."
+                );
+            }
+
+            return data;
+        }
+
+        // Doctor Signup
+        signupForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const message = document.getElementById("signupMessage");
+            const button = document.getElementById("signupButton");
+
+            message.textContent = "";
+            message.className = "message";
+
+            const password = document.getElementById("signupPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (password !== confirmPassword) {
+                message.textContent = "Passwords do not match.";
+                message.className = "message error";
+                return;
+            }
+
+            const body = {
+                fullName: document.getElementById("fullName").value.trim(),
+                email: document.getElementById("signupEmail").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                password: password,
+                role: "DOCTOR",
+                specialty: document.getElementById("specialty").value.trim(),
+                licenseNumber: document.getElementById("licenseNumber").value.trim()
+            };
+
+            button.disabled = true;
+            button.textContent = "Creating Account...";
+
+            try {
+                const response = await fetch("/api/auth/signup", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                await readResponse(response);
+
+                document.getElementById("loginEmail").value = body.email;
+
+                showForm("login");
+
+                const loginMessage = document.getElementById("loginMessage");
+
+                loginMessage.textContent =
+                    "Signup successful. Please log in.";
+
+                loginMessage.className = "message success";
+
+                signupForm.reset();
+
+            } catch (error) {
+                message.textContent = error.message === "Failed to fetch"
+                    ? "Cannot connect to MedSync. Make sure Spring Boot is running."
+                    : error.message;
+
+                message.className = "message error";
+
+            } finally {
+                button.disabled = false;
+                button.textContent = "Create Account";
+            }
+        });
+
+        // Doctor Login
+        loginForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const message = document.getElementById("loginMessage");
+            const button = document.getElementById("loginButton");
+
+            message.textContent = "";
+            message.className = "message";
+
+            button.disabled = true;
+            button.textContent = "Signing in...";
+
+            const email = document.getElementById("loginEmail").value.trim();
+
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: document.getElementById("loginPassword").value
+                    })
+                });
+
+                const data = await readResponse(response);
+                const user = data.user || data;
+                const role = data.role || user.role;
+
+                if (role && role !== "DOCTOR") {
+                    throw new Error(
+                        "This account is not registered as a doctor."
+                    );
+                }
+
+                localStorage.setItem(
+                    "medsyncUser",
+                    JSON.stringify({
+                        ...user,
+                        email: user.email || email,
+                        role: role || "DOCTOR"
+                    })
+                );
+
+                window.location.href = "/pages/doctor-dashboard.html";
+
+            } catch (error) {
+                message.textContent = error.message === "Failed to fetch"
+                    ? "Cannot connect to MedSync. Make sure Spring Boot is running."
+                    : error.message;
+
+                message.className = "message error";
+
+            } finally {
+                button.disabled = false;
+                button.textContent = "Login";
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Verification | MedSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #142D4E;
+        }
+
+        header {
+            min-height: 75px;
+            padding: 18px 35px;
+            background: #142D4E;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            color: white;
+            text-decoration: none;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        button, .back-button {
+            border: 0;
+            border-radius: 5px;
+            padding: 11px 16px;
+            background: #1D5FA7;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            background: white;
+            color: #142D4E;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 0 22px;
+        }
+
+        .page-heading {
+            margin-bottom: 25px;
+        }
+
+        .page-heading h1 {
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        #message {
+            margin: 15px 0;
+            color: #1D5FA7;
+        }
+
+        #message.error {
+            color: #b42318;
+        }
+
+        .doctor-card {
+            background: white;
+            border: 1px solid #e1e8f0;
+            border-radius: 8px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .doctor-card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .doctor-card p {
+            margin: 10px 0;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .reject-button {
+            background: #b42318;
+        }
+
+        .empty-message {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            color: #64748b;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 16px;
+            }
+
+            main {
+                margin-top: 25px;
+                padding: 0 14px;
+            }
+
+            .doctor-card {
+                padding: 17px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="../index.html" class="brand">MedSync</a>
+        <button type="button" class="logout-button" id="logoutButton">
+            Logout
+        </button>
+    </header>
+
+    <main>
+        <div class="page-heading">
+            <h1>Doctor Verification</h1>
+            <p>Review doctor registration details and approve or reject applications.</p>
+            <a href="admin-dashboard.html" class="back-button">
+                Back to Dashboard
+            </a>
+        </div>
+
+        <p id="message" role="status">Loading doctor applications...</p>
+        <section id="doctorList"></section>
+    </main>
+
+    <script>
+        const message = document.getElementById("message");
+        const doctorList = document.getElementById("doctorList");
+
+        async function api(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            const text = await response.text();
+            let data = {};
+
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { message: text };
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    data.error ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            return data;
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[character]));
+        }
+
+        function showMessage(text, isError = false) {
+            message.textContent = text;
+            message.classList.toggle("error", isError);
+        }
+
+        async function loadDoctors() {
+            showMessage("Loading doctor applications...");
+            doctorList.innerHTML = "";
+
+            try {
+                const users = await api("/api/admin/users");
+
+                const doctors = users.filter(user =>
+                    String(user.role).toUpperCase() === "DOCTOR" &&
+                    user.verified !== true &&
+                    user.active !== false
+                );
+
+                if (!doctors.length) {
+                    showMessage("There are no pending doctor applications.");
+                    doctorList.innerHTML = `
+                        <div class="empty-message">
+                            No doctor applications need verification right now.
+                        </div>
+                    `;
+                    return;
+                }
+
+                showMessage(`${doctors.length} doctor application(s) awaiting verification.`);
+
+                doctorList.innerHTML = doctors.map(doctor => `
+                    <article class="doctor-card">
+                        <h2>${escapeHTML(doctor.fullName || "Unnamed Doctor")}</h2>
+
+                        <p><strong>Email:</strong>
+                            ${escapeHTML(doctor.email || "Not provided")}
+                        </p>
+
+                        <p><strong>Phone:</strong>
+                            ${escapeHTML(doctor.phone || "Not provided")}
+                        </p>
+
+                        <p><strong>Specialization:</strong>
+                            ${escapeHTML(doctor.specialty || "Not provided")}
+                        </p>
+
+                        <p><strong>Registration / Verification ID:</strong>
+                            ${escapeHTML(doctor.licenseNumber || "Not provided")}
+                        </p>
+
+                        <p><strong>Address:</strong>
+                            ${escapeHTML(doctor.address || "Not provided")}
+                        </p>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                data-id="${escapeHTML(doctor.id)}"
+                                data-approved="true">
+                                Approve Doctor
+                            </button>
+
+                            <button
+                                type="button"
+                                class="reject-button"
+                                data-id="${escapeHTML(doctor.id)}"
+                                data-approved="false">
+                                Reject Doctor
+                            </button>
+                        </div>
+                    </article>
+                `).join("");
+
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        doctorList.addEventListener("click", async event => {
+            const button = event.target.closest("button[data-id]");
+
+            if (!button) {
+                return;
+            }
+
+            const id = button.dataset.id;
+            const approved = button.dataset.approved === "true";
+
+            button.disabled = true;
+
+            try {
+                await api(`/api/admin/doctors/${id}/verification`, {
+                    method: "PATCH",
+                    body: JSON.stringify({ approved })
+                });
+
+                await loadDoctors();
+
+                showMessage(
+                    approved
+                        ? "Doctor approval submitted successfully."
+                        : "Doctor rejection submitted."
+                );
+
+            } catch (error) {
+                showMessage(error.message, true);
+                button.disabled = false;
+            }
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            try {
+                await api("/api/auth/logout", { method: "POST" });
+            } finally {
+                location.replace("admin-login.html");
+            }
+        });
+
+        async function initialize() {
+            try {
+                const user = await api("/api/auth/me");
+
+                if (user.role !== "ADMIN") {
+                    location.replace("admin-login.html");
+                    return;
+                }
+
+                await loadDoctors();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        }
+
+        initialize();
+    </script>
+</body>
+</html>
